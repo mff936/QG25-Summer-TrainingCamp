@@ -438,3 +438,115 @@ fun main() {
 | a[b] = c     | a.set(b, c)    |
 | a in b       | b.contains(a)  |
 
+## 高阶函数
+
+### 1.定义高阶函数
+
+在函数式API和标准函数里，逻辑要求我们传入一个Lambda表达式作为参数，而如果像定义自己的函数式API，就得借助高阶函数实现。
+
+**高阶函数的定义**：**如果一个函数接收另一个函数作为参数，或者返回值的类型是另一个函数，那么该函数就成为高阶函数。**
+
+定义函数类型的规则如下：
+
+```kotlin
+(String, Int) -> Unit
+```
+
+定义函数类型关键在于声明函数接收什么参数和它的返回值是什么。所以->左边的部分表示接收什么类型的参数，如果不接收任何参数，括号内就不用写任何东西；->右边用于声明该函数的返回值是什么类型，如果没有返回值就用Unit
+
+```kotlin
+fun example(func:(String, Int) -> Unit) {
+    func("hello", 123)
+}
+```
+
+上面这段代码中example函数获得了一个函数类型的参数，因此example函数就是一个高阶函数。
+
+**高阶函数的作用：高阶函数允许让函数类型的参数来决定函数的执行逻辑。**
+
+下面是一个具体的例子：
+
+```kotlin
+fun num1AndNum2(num1:Int, num2: Int, operation: (Int, Int) -> Int): Int {
+    val result = operation(num1, num2)
+    return result
+}	//高阶函数，传入两个整型类型的变量和一个函数类型变量
+
+fun plus(num1: Int, num2: Int) : Int {
+    return num1 + num2	
+}	//定义第一个函数（与高阶函数传入的函数一致）
+
+fun minus(num1: Int, num2: Int) : Int {
+    return num1 - num2
+}	//定义第二个函数（与高阶函数传入的函数一致）
+
+fun main() {
+    val num1 = 100
+    val num2 = 80
+    val result1 = num1AndNum2(num1, num2, ::plus)
+    val result2 = num1AndNum2(num1, num2, ::minus)	//以::加函数名的方式引用函数
+    println("result1 is $result1")
+    println("result2 is $result2")
+}
+```
+
+Lambda表达式是最常见也是最普遍的高阶函数调用方式，使用Lambda表达式写法可以将上面的代码写成以下形式：
+
+```kotlin
+fun num1AndNum2(num1:Int, num2: Int, operation: (Int, Int) -> Int): Int {
+    val result = operation(num1, num2)
+    return result
+}
+
+fun main() {
+    val num1 = 100
+    val num2 = 80
+    val result1 = num1AndNum2(num1, num2) { n1, n2 ->
+    	n1 + n2
+    }
+    val result2 = num1AndNum2(num1, num2) { n1, n2 ->
+        n1 - n2
+    }	//Lambda表达式的最后一行直接作为返回值
+    println("result1 is $result1")
+    println("result2 is $result2")
+}
+```
+
+```kotlin
+fun StringBuilder.build(block: StringBuilder.() -> Unit) : StringBuilder {
+    block()
+    return this
+}
+
+fun main() {
+    val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+    val result = StringBuilder().build {
+        append("Start eating fruits.\n")
+        for (fruit in list) {
+            append(fruit).append("\n")
+        }
+        append("Ate all fruits.\n")
+    }
+    println(result.toString())
+}
+```
+
+上面就相当于apply函数的实现；但是apply函数可以用在所有的类上面，build扩展函数只能用在StringBuilder类上。
+
+### 2.内联函数的作用
+
+ Kotlin的代码要编译成Java字节码，观察发现每使用一次Lambda表达式，Java中就会创建一个新的匿名类实例，造成额外的内存和性能开销。而Kotlin的内联函数能够在编译时自动替换Lambda表达式中的内容到调用他的地方。
+
+使用的时候在高阶函数fun前面加上inline即可，这样便能够完全消除Lambda表达式所带来的运行时开销。
+
+### 3.noinline与crossinline
+
+如果一个高阶函数中接收到了多个函数类型的参数，又给函数加上了inline关键字，那么Kotlin编译器会将所有引用的Lambda表达式全部进行内联；这时如果想只内联某几个Lamda表达式，这个时候就可以使用noinline关键字
+
+```kotlin
+inline fun test(block1: () -> Unit, noinline block2: () -> Unit) {
+    ...
+}
+```
+
+总的来说，inline用于创建内联函数，noinline用于取消内联，而crossinline用于加强内联
