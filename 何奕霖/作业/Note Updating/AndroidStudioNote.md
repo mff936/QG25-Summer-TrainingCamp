@@ -1470,7 +1470,7 @@ implementation("com.google.code.gson:gson:版本")
 class App(val id: String, val name: String, val version: String)
 ```
 
-上面的json文件中需要解析的是HSON数组，要借助TypeToken将期望解析成的数据类型传入fromJson()方法中
+上面的json文件中需要解析的是JSON数组，要借助TypeToken将期望解析成的数据类型传入fromJson()方法中
 
 ```kotlin
 val typeOf = object : TypeToken<List<Game>>() {}.type
@@ -1494,7 +1494,7 @@ class App(val id: String, val name: String, val version: String)
 ```kotlin
 interface AppService {
     
-    @GET("get_data.json")	//@GET注解表示放调用getAppData()方法时会发起一条GET请求
+    @GET("get_data.json")	//@GET注解表示当调用getAppData()方法时会发起一条GET请求
     fun getAppData(): Call<List<App>>	//getAppData()方法的返回值必须声明成Retrofit中内置的Call类型，并通过泛型来指定服务器响应的对象是一个List。
 }
 ```

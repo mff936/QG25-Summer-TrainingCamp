@@ -7,8 +7,7 @@ interface WebSocketContract {
 
     interface View {
         fun showConnectionStatus(connected: Boolean)
-        fun showMessage(message: String)
-        fun showError(error: String)
+        fun showMessage(message: String)v 
     }
 
     interface Presenter {
@@ -42,7 +41,7 @@ class WebSocketModel : WebSocketContract.Model {
 
     override fun connect(listener: WebSocketListener) {
         val request = okhttp3.Request.Builder()
-            .url("wss://echo.websocket.events") // Replace with your WebSocket URL
+            .url("wss://echo.websocket.events") 
             .build()
 	//创建WebSocket请求，指定服务器地址
         webSocket = client.newWebSocket(request, listener)
